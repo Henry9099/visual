@@ -9,7 +9,7 @@
 		.label {
 			font-size: 20px
 		}
-		div.hand_buttons{
+		div.hand_buttons {
 			position: fixed;
 			top: 75px;
 			left: 100px;
@@ -89,7 +89,6 @@
 				.attr('transform', 'translate(' + margin + ',0)')
 				.call(HR_axis)
 
-
 			d3.selectAll('circle')
 				.attr('cx', function(d) {
 					return avg_scale(d['avg']);
@@ -107,7 +106,6 @@
 		            		return both_color;
 		            	}
 	            	});
-
 
 	            svg.append('text')
 	            	.attr('class', 'y axis label')
@@ -143,10 +141,8 @@
 				.attr('transform', 'translate(' + scaled_mean + ',' + (margin - 10) + ')')
 				.text('Average number of runs per game for all players (' + mean_to_print + ')')
 
-
-
-
 	            var hands = ['L','R', 'B', 'All']
+	            var legend_hands = ['L', 'R', 'B']
 
 	            var buttons = d3.select('body')
 	            			.append('div')
@@ -159,22 +155,53 @@
 	            				return d;
 	            			});
 
+	            var legend = svg.append('g')
+	            	.attr('class', 'legend')
+	            	.attr('transform', 'translate(220, 100)')
+	            	.selectAll('g')
+	            	.data(legend_hands)
+	            	.enter()
+	            	.append('g');
+
+	            var legend_gap = 40
+	            var radius = 15
+	            legend.append('circle')
+	            	.attr('cy', function(d,i) {
+	            		return i * legend_gap;
+	            	})
+	            	.attr('r', radius)
+	            	.attr('fill', function(d) {
+	            		if (d === 'L') {
+	            			return left_color
+	            		} else if (d=== 'R') {
+	            			return right_color
+	            		} else {
+	            			return both_color            		
+	            		}
+	            	});
+	            legend.append('text')
+	            	.attr('y', function(d,i) {
+	            		return i * legend_gap + radius / 2; 
+	            	})
+	            	.attr('x', 25)
+	            	.style('font-size', '20px')
+	            	.style('font-weight', 'bold')
+	            	.text(function(d) {
+	            		return d;
+	            	});
+
 	            function update(hand,data) {
             		var filtered = data.filter(function(d) {
             			return d['handedness'] === hand;
             		});
 
-	            	var circles = svg.selectAll('circle')
+	            	var circles = svg.select('.bubble').selectAll('circle')
 	            				.data(filtered, function(d) {
 	            					return d['name'];
 	            	});
 	            	var mean = d3.mean(filtered, function(d) {
 					return d['avg'];
 				})
-
-
-
-
 
 	            	if (hand === 'All') {
 	                 		svg.selectAll('line').remove()
@@ -183,7 +210,7 @@
 						return d['avg'];
 					})
 
-	            		var circles = svg.selectAll('circle')
+	            		var circles = svg.select('.bubble').selectAll('circle')
 	            					.data(data, function(d) {
 	            						return d['name'];
 	            		})
@@ -245,29 +272,12 @@
 					.attr('text-anchor', 'middle')
 					.attr('transform', 'translate(' + scaled_mean + ',' + (margin - 10) + ')')
 					.text('Average number of runs per game for ' + full_hand(hand) + ' (' + mean_to_print + ')')
-
-
-
-
-
-
-	            		
-	       
-	            	
-	            	
-
 	            }
 
 	            buttons.on('click', function(d) {
 	            	update(d, data);
 	            })
-
-
-
 		}
-
-
-
 
 	</script>
 
