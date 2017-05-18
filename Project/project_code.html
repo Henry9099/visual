@@ -137,14 +137,15 @@
 	            			.rollup(agg_hand)
 	            			.entries(data);
 	            
-	            function update(hand) {
-	            	var filtered = nested.filter(function(d) {
-	            		return d['key'] === hand;
-	            	});
+	            function update(hand,data) {
+            		var filtered = data.filter(function(d) {
+            			return d['handedness'] === hand;
+            		});
+            		debugger;
+
 	            	var circles = svg.selectAll('circle')
-	            				.data(filtered, function(d) {
-	            					return d.values['people'];
-	            				});
+	            				.data(filtered);
+	            				
 
 	            	circles.exit().remove();
 
@@ -155,7 +156,7 @@
 	            }
 
 	            buttons.on('click', function(d) {
-	            	update(d);
+	            	update(d, data);
 	            })
 
 
