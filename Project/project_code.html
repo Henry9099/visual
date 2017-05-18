@@ -6,6 +6,17 @@
 		text {
 			font-family: 'Arial'
 		}
+		div.hand_buttons{
+			position: fixed;
+			top: 75px;
+			left: 100px;
+		}
+		div.hand_buttons div {
+			background-color: rgb(251, 201, 127);
+        		padding: 20px;
+        		margin: 20px;
+        		font-family: 'Arial';	
+		}
 	</style>
 	<script type="text/javascript">
 		function draw(data) {
@@ -21,9 +32,12 @@
 				.append('g')
 				.attr('class', 'graph');
 
-			d3.select('svg')
+			svg.append('g')
+				.attr('class', 'bubble')
 				.selectAll('circle')
-				.data(data)
+				.data(data, function(d) {
+					return d['name']
+				})
 				.enter()
 				.append('circle')
 
@@ -50,14 +64,12 @@
 				.scale(HR_scale)
 				.orient('left');
 
-			d3.select('svg')
-				.append('g')
+				svg.append('g')
 				.attr('class', 'x axis')
 				.attr('transform', 'translate(0,' + height + ')')
 				.call(avg_axis)
 
-			d3.select('svg')
-				.append('g')
+				svg.append('g')
 				.attr('class', 'y axis')
 				.attr('transform', 'translate(' + margin + ',0)')
 				.call(HR_axis)
@@ -93,6 +105,60 @@
 	            	.attr('text-anchor', 'middle')
 	            	.attr('transform', 'translate(' + (width / 2) +',' + (height + margin - 30) + ')rotate(0)')
 	            	.text('Average Runs per Game');
+
+	            var hands = ['L','R', 'B']
+
+	            var buttons = d3.select('body')
+	            			.append('div')
+	            			.attr('class', 'hand_buttons')
+	            			.selectAll('div')
+	            			.data(hands)
+	            			.enter()
+	            			.append('div')
+	            			.text(function(d) {
+	            				return d;
+	            			});
+	            function agg_hand(leaves) {
+	            	var people = d3.set()
+
+	            	leaves.forEach(function(d) {
+	            		people.add(d['name']);
+	            	});
+
+	            	return {
+	            		'people': people.values()
+	            	}
+	            }
+
+	            var nested = d3.nest()
+	            			.key(function(d) {
+	            				return d['handedness'];
+	            			})
+	            			.rollup(agg_hand)
+	            			.entries(data);
+	            
+	            function update(hand) {
+	            	var filtered = nested.filter(function(d) {
+	            		return d['key'] === hand;
+	            	});
+	            	var circles = svg.selectAll('circle')
+	            				.data(filtered, function(d) {
+	            					return d.values['people'];
+	            				});
+
+	            	circles.exit().remove();
+
+	            	circles.enter()
+	            		.append('circle')
+	            		.style('fill', 'red');
+
+	            }
+
+	            buttons.on('click', function(d) {
+	            	update(d);
+	            })
+
+
 
 		}
 
