@@ -125,12 +125,12 @@
 	            	.attr('transform', 'translate(' + (width / 2) +',' + (height + margin - 30) + ')rotate(0)')
 	            	.text('Average Runs per Game');
 
-	           	var mean = d3.mean(data, function(d) {
+	           	var mean = d3.mean(data, function(d) { // getting mean avg to create a line on the graph
 				return d['avg'];
 			})
 			var scaled_mean = avg_scale(mean)
 
-			svg.append('line')
+			svg.append('line') // the avg mean line
 				.attr('class', 'avg line')
 				.attr('x1', scaled_mean)
 				.attr('x2', scaled_mean)
@@ -139,7 +139,7 @@
 				.attr('stroke-width', 2)
 				.attr('stroke', 'black')
 
-			var mean_to_print = mean.toFixed(2) 
+			var mean_to_print = mean.toFixed(2) //reduce the number of decimal points for readability
 
 			svg.append('text')
 				.attr('class', 'avg label')
@@ -149,7 +149,7 @@
 				.style('font-style', 'italic')
 
 	            var hands = ['L','R', 'B', 'All']
-	            var legend_hands = ['L', 'R', 'B']
+	            var legend_hands = ['Left', 'Right', 'Both']
 
 	            var buttons = d3.select('body')
 	            			.append('div')
@@ -178,9 +178,9 @@
 	            	})
 	            	.attr('r', radius)
 	            	.attr('fill', function(d) {
-	            		if (d === 'L') {
+	            		if (d === 'Left') {
 	            			return left_color
-	            		} else if (d=== 'R') {
+	            		} else if (d=== 'Right') {
 	            			return right_color
 	            		} else {
 	            			return both_color            		
@@ -210,7 +210,7 @@
 					return d['avg'];
 				})
 
-	            	if (hand === 'All') {
+	            	if (hand === 'All') { // function entered to allow the reader to access all data at once
 	                 		svg.selectAll('line').remove()
 
 	            		var mean = d3.mean(data, function(d) {
@@ -247,7 +247,7 @@
 
 	            	var scaled_mean = avg_scale(mean)
 
-				svg.selectAll('line').remove()
+				svg.selectAll('line').remove() // new mean line - reflecting points visible on the graph
 				svg.selectAll('.avg.label').remove()
 
 				svg.append('line')
@@ -260,7 +260,7 @@
 					.attr('stroke-width', 2)
 					.attr('stroke', 'black')
 
-				function full_hand(hand) {
+				function full_hand(hand) { // create the more verbose version for printing on the page
 					if (hand === 'R') {
 						return 'right handers'
 					} else if (hand === 'L'){
