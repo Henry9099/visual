@@ -1,2 +1,113 @@
-Investigation of the relationship between avg and HR
-Split data into L, R and B
+<!DOCTYPE html>
+<html>
+<head>
+	<script src="http://d3js.org/d3.v3.min.js"></script>
+	<style></style>
+	<script type="text/javascript">
+		function draw(data) {
+			'use strict';
+			var margin = 75,
+				width = 1400 - margin,
+				height = 600 - margin;
+
+			var svg = d3.select('body')
+				.append('svg')
+				.attr('width', width + margin)
+				.attr('height', height + margin)
+				.append('g')
+				.attr('class', 'graph');
+
+			d3.select('svg')
+				.selectAll('circle')
+				.data(data)
+				.enter()
+				.append('circle')
+
+			var avg_extent = d3.extent(data, function(d) {
+				return d['avg'];
+			});
+
+			var HR_extent = d3.extent(data, function(d) {
+				return d['HR'];
+			});
+
+			var avg_scale = d3.scale.linear()
+				.range([margin, width])
+				.domain(avg_extent)
+
+			var HR_scale = d3.scale.linear()
+				.range([height, margin])
+				.domain(HR_extent);
+
+			var avg_axis = d3.svg.axis()
+				.scale(avg_scale);
+
+			var HR_axis = d3.svg.axis()
+				.scale(HR_scale)
+				.orient('left');
+
+			d3.select('svg')
+				.append('g')
+				.attr('class', 'x axis')
+				.attr('transform', 'translate(0,' + height + ')')
+				.call(avg_axis)
+
+			d3.select('svg')
+				.append('g')
+				.attr('class', 'y axis')
+				.attr('transform', 'translate(' + margin + ',0)')
+				.call(HR_axis)
+
+
+			d3.selectAll('circle')
+				.attr('cx', function(d) {
+					return avg_scale(d['avg']);
+				})
+				.attr('cy', function(d) {
+					return HR_scale(d['HR']);
+				})
+				.attr('r', 5)
+		            .attr('fill', function(d) {
+		            	if (d['handedness'] == 'R') {
+		            		return 'blue'
+		            	} else if (d['handedness'] == 'L') {
+		            		return 'green'
+		            	} else {
+		            		return 'red';
+		            	}
+	            	});
+
+		}
+
+
+
+
+	</script>
+
+</head>
+<body>
+
+<script type="text/javascript">
+	d3.csv("baseball_data.csv", function(d) {
+		d['height'] = +d['height'];
+		d['weight'] = +d['weight'];
+		d['avg'] = +d['avg'];
+		d['HR'] = +d['HR'];
+		return d;
+	}, draw);
+</script>
+
+</body>
+</html>
+
+
+
+
+
+
+
+
+
+
+
+
