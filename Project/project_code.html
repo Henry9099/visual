@@ -3,6 +3,10 @@
 <head>
 	<script src="http://d3js.org/d3.v3.min.js"></script>
 	<style>
+		h2 {
+			text-align: center;
+			font-family: 'Arial';
+		}
 		text {
 			font-family: 'Arial';
 		}
@@ -11,7 +15,7 @@
 		}
 		div.hand_buttons {
 			position: fixed;
-			top: 75px;
+			top: 125px;
 			left: 100px;
 		}
 		div.hand_buttons div {
@@ -39,6 +43,8 @@
 			var margin = 75,
 				width = 1400 - margin,
 				height = 600 - margin;
+
+			d3.select('body').append('h2').text('Baseball Player Performance by Dominant Hand')
 
 			var svg = d3.select('body')
 				.append('svg')
@@ -133,13 +139,14 @@
 				.attr('stroke-width', 2)
 				.attr('stroke', 'black')
 
-			var mean_to_print = mean.toFixed(3) 
+			var mean_to_print = mean.toFixed(2) 
 
 			svg.append('text')
 				.attr('class', 'avg label')
 				.attr('text-anchor', 'middle')
 				.attr('transform', 'translate(' + scaled_mean + ',' + (margin - 10) + ')')
 				.text('Average number of runs per game for all players (' + mean_to_print + ')')
+				.style('font-style', 'italic')
 
 	            var hands = ['L','R', 'B', 'All']
 	            var legend_hands = ['L', 'R', 'B']
@@ -265,13 +272,14 @@
 					}
 				};
 
-				var mean_to_print = mean.toFixed(3) 
+				var mean_to_print = mean.toFixed(2) 
 
 				svg.append('text')
 					.attr('class', 'avg label')
 					.attr('text-anchor', 'middle')
 					.attr('transform', 'translate(' + scaled_mean + ',' + (margin - 10) + ')')
 					.text('Average number of runs per game for ' + full_hand(hand) + ' (' + mean_to_print + ')')
+					.style('font-style', 'italic')
 	            }
 
 	            buttons.on('click', function(d) {
