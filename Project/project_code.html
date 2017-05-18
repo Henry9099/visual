@@ -19,6 +19,10 @@
 		}
 	</style>
 	<script type="text/javascript">
+		var left_color = 'green'
+		var right_color = 'blue'
+		var both_color = 'red'
+
 		function draw(data) {
 			'use strict';
 			var margin = 75,
@@ -85,11 +89,11 @@
 				.attr('r', 5)
 		            .attr('fill', function(d) {
 		            	if (d['handedness'] == 'R') {
-		            		return 'blue'
+		            		return right_color
 		            	} else if (d['handedness'] == 'L') {
-		            		return 'green'
+		            		return left_color
 		            	} else {
-		            		return 'red';
+		            		return both_color;
 		            	}
 	            	});
 
@@ -106,7 +110,7 @@
 	            	.attr('transform', 'translate(' + (width / 2) +',' + (height + margin - 30) + ')rotate(0)')
 	            	.text('Average Runs per Game');
 
-	            var hands = ['L','R', 'B']
+	            var hands = ['L','R', 'B', 'All']
 
 	            var buttons = d3.select('body')
 	            			.append('div')
@@ -118,40 +122,52 @@
 	            			.text(function(d) {
 	            				return d;
 	            			});
-	            function agg_hand(leaves) {
-	            	var people = d3.set()
 
-	            	leaves.forEach(function(d) {
-	            		people.add(d['name']);
-	            	});
-
-	            	return {
-	            		'people': people.values()
-	            	}
-	            }
-
-	            var nested = d3.nest()
-	            			.key(function(d) {
-	            				return d['handedness'];
-	            			})
-	            			.rollup(agg_hand)
-	            			.entries(data);
-	            
 	            function update(hand,data) {
             		var filtered = data.filter(function(d) {
             			return d['handedness'] === hand;
             		});
-            		debugger;
 
 	            	var circles = svg.selectAll('circle')
-	            				.data(filtered);
+	            				.data(filtered, function(d) {
+	            					return d['name'];
+	            				});
+
+	            	if (hand === 'All') {
+	            		var circles = svg.selectAll('circle')
+	            					.data(data, function(d) {
+	            						return d['name'];
+	            		})
+	            	};	
 	            				
-
 	            	circles.exit().remove();
-
 	            	circles.enter()
 	            		.append('circle')
-	            		.style('fill', 'red');
+
+	            		.attr('cx', function(d) {
+	            			return avg_scale(d['avg'])
+	            		})
+	            		.attr('cy', function(d) {
+	            			return HR_scale(d['HR'])
+	            		})
+	            		.attr('r', 5)
+	            	circles.style('fill', function (d) {
+	            		if (d['handedness'] === 'L') {
+	            			return left_color
+	            		} else if (d['handedness'] === 'R') {
+	            			return right_color
+	            		} else {
+	            			return both_color;
+	            		}
+	            	});
+
+
+
+
+	            		
+	       
+	            	
+	            	
 
 	            }
 
