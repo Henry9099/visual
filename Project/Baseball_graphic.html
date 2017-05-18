@@ -1,0 +1,322 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<script src="http://d3js.org/d3.v3.min.js"></script>
+	<style>
+		h2 {
+			text-align: center;
+			font-family: 'Arial';
+		}
+		h3 { font-weight: normal;
+			font-family: 'Arial'
+		 }
+		text {
+			font-family: 'Arial';
+		}
+		.label {
+			font-size: 20px
+		}
+		div.hand_buttons {
+			position: fixed;
+			top: 125px;
+			left: 100px;
+		}
+		div.hand_buttons div {
+			background-color: rgb(251, 201, 127);
+        		padding: 20px;
+        		margin: 20px;
+        		font-family: 'Arial';	
+		}
+		line {
+			border: none;
+			border-top: 5px dotted 'black';
+			width: 5px;
+		}
+		circle {
+			opacity: 0.4;
+		}
+	</style>
+	<script type="text/javascript">
+		var left_color = 'green'
+		var right_color = 'blue'
+		var both_color = 'red'
+
+		function draw(data) {
+			'use strict';
+			var margin = 75,
+				width = 1400 - margin,
+				height = 600 - margin;
+
+			d3.select('body').append('h2').text('Baseball Player Performance by Dominant Hand')
+			d3.select('body').append('h3').text('Showing the positive relationship between lifetime Home Runs and average runs per game. By clicking the sqaures on the right, viewers can more easiliy the difference in performance between right handers and left/ ambidextrous batters. Perhaps the fielders were less used to left-handers so can\'t field as effectively...')
+
+			var svg = d3.select('body')
+				.append('svg')
+				.attr('width', width + margin)
+				.attr('height', height + margin)
+				.append('g')
+				.attr('class', 'graph');
+
+			svg.append('g')
+				.attr('class', 'bubble')
+				.selectAll('circle')
+				.data(data, function(d) {
+					return d['name']
+				})
+				.enter()
+				.append('circle')
+
+			var avg_extent = d3.extent(data, function(d) {
+				return d['avg'];
+			});
+
+			var HR_extent = d3.extent(data, function(d) {
+				return d['HR'];
+			});
+
+			var avg_scale = d3.scale.linear()
+				.range([margin, width])
+				.domain(avg_extent)
+
+			var HR_scale = d3.scale.linear()
+				.range([height, margin])
+				.domain(HR_extent);
+
+			var avg_axis = d3.svg.axis()
+				.scale(avg_scale);
+
+			var HR_axis = d3.svg.axis()
+				.scale(HR_scale)
+				.orient('left');
+
+				svg.append('g')
+				.attr('class', 'x axis')
+				.attr('transform', 'translate(0,' + height + ')')
+				.call(avg_axis)
+
+				svg.append('g')
+				.attr('class', 'y axis')
+				.attr('transform', 'translate(' + margin + ',0)')
+				.call(HR_axis)
+
+			d3.selectAll('circle')
+				.attr('cx', function(d) {
+					return avg_scale(d['avg']);
+				})
+				.attr('cy', function(d) {
+					return HR_scale(d['HR']);
+				})
+				.attr('r', 5)
+		            .attr('fill', function(d) {
+		            	if (d['handedness'] == 'R') {
+		            		return right_color
+		            	} else if (d['handedness'] == 'L') {
+		            		return left_color
+		            	} else {
+		            		return both_color;
+		            	}
+	            	});
+
+	            svg.append('text')
+	            	.attr('class', 'y axis label')
+	            	.attr('text-anchor', 'middle')
+	            	.attr('transform', 'translate(' + (margin / 2 - 5) +',' + (height / 2) + ')rotate(-90)')
+	            	.text('Home Runs in Career');
+
+	            svg.append('text')
+	            	.attr('class', 'x axis label')
+	            	.attr('text-anchor', 'middle')
+	            	.attr('transform', 'translate(' + (width / 2) +',' + (height + margin - 30) + ')rotate(0)')
+	            	.text('Average Runs per Game');
+
+	           	var mean = d3.mean(data, function(d) { // getting mean avg to create a line on the graph
+				return d['avg'];
+			})
+			var scaled_mean = avg_scale(mean)
+
+			svg.append('line') // the avg mean line
+				.attr('class', 'avg line')
+				.attr('x1', scaled_mean)
+				.attr('x2', scaled_mean)
+				.attr('y1', height)
+				.attr('y2', margin)
+				.attr('stroke-width', 2)
+				.attr('stroke', 'black')
+
+			var mean_to_print = mean.toFixed(2) //reduce the number of decimal points for readability
+
+			svg.append('text')
+				.attr('class', 'avg label')
+				.attr('text-anchor', 'middle')
+				.attr('transform', 'translate(' + scaled_mean + ',' + (margin - 10) + ')')
+				.text('Average number of runs per game for all players (' + mean_to_print + ')')
+				.style('font-style', 'italic')
+
+	            var hands = ['L','R', 'B', 'All']
+	            var legend_hands = ['Left', 'Right', 'Both']
+
+	            var buttons = d3.select('body')
+	            			.append('div')
+	            			.attr('class', 'hand_buttons')
+	            			.selectAll('div')
+	            			.data(hands)
+	            			.enter()
+	            			.append('div')
+	            			.text(function(d) {
+	            				return d;
+	            			});
+
+	            var legend = svg.append('g')
+	            	.attr('class', 'legend')
+	            	.attr('transform', 'translate(220, 100)')
+	            	.selectAll('g')
+	            	.data(legend_hands)
+	            	.enter()
+	            	.append('g');
+
+	            var legend_gap = 40
+	            var radius = 15
+	            legend.append('circle')
+	            	.attr('cy', function(d,i) {
+	            		return i * legend_gap;
+	            	})
+	            	.attr('r', radius)
+	            	.attr('fill', function(d) {
+	            		if (d === 'Left') {
+	            			return left_color
+	            		} else if (d=== 'Right') {
+	            			return right_color
+	            		} else {
+	            			return both_color            		
+	            		}
+	            	});
+	            legend.append('text')
+	            	.attr('y', function(d,i) {
+	            		return i * legend_gap + radius / 2; 
+	            	})
+	            	.attr('x', 25)
+	            	.style('font-size', '20px')
+	            	.style('font-weight', 'bold')
+	            	.text(function(d) {
+	            		return d;
+	            	});
+
+	            function update(hand,data) {
+            		var filtered = data.filter(function(d) {
+            			return d['handedness'] === hand;
+            		});
+
+	            	var circles = svg.select('.bubble').selectAll('circle')
+	            				.data(filtered, function(d) {
+	            					return d['name'];
+	            	});
+	            	var mean = d3.mean(filtered, function(d) {
+					return d['avg'];
+				})
+
+	            	if (hand === 'All') { // function entered to allow the reader to access all data at once
+	                 		svg.selectAll('line').remove()
+
+	            		var mean = d3.mean(data, function(d) {
+						return d['avg'];
+					})
+
+	            		var circles = svg.select('.bubble').selectAll('circle')
+	            					.data(data, function(d) {
+	            						return d['name'];
+	            		})
+
+	            	};	
+	            				
+	            	circles.exit().remove();
+	            	circles.enter()
+	            		.append('circle')
+
+	            		.attr('cx', function(d) {
+	            			return avg_scale(d['avg'])
+	            		})
+	            		.attr('cy', function(d) {
+	            			return HR_scale(d['HR'])
+	            		})
+	            		.attr('r', 5)
+	            	circles.style('fill', function (d) {
+	            		if (d['handedness'] === 'L') {
+	            			return left_color
+	            		} else if (d['handedness'] === 'R') {
+	            			return right_color
+	            		} else {
+	            			return both_color;
+	            		}
+	            	});
+
+	            	var scaled_mean = avg_scale(mean)
+
+				svg.selectAll('line').remove() // new mean line - reflecting points visible on the graph
+				svg.selectAll('.avg.label').remove()
+
+				svg.append('line')
+					.style('border-bottom', 'dotted')
+					.attr('class', 'avg line')
+					.attr('x1', scaled_mean)
+					.attr('x2', scaled_mean)
+					.attr('y1', height)
+					.attr('y2', margin)
+					.attr('stroke-width', 2)
+					.attr('stroke', 'black')
+
+				function full_hand(hand) { // create the more verbose version for printing on the page
+					if (hand === 'R') {
+						return 'right handers'
+					} else if (hand === 'L'){
+						return 'left handers'
+					} else if (hand === 'B') {
+						return 'ambidextrous batters'
+					} else {
+						return 'all players'
+					}
+				};
+
+				var mean_to_print = mean.toFixed(2) 
+
+				svg.append('text')
+					.attr('class', 'avg label')
+					.attr('text-anchor', 'middle')
+					.attr('transform', 'translate(' + scaled_mean + ',' + (margin - 10) + ')')
+					.text('Average number of runs per game for ' + full_hand(hand) + ' (' + mean_to_print + ')')
+					.style('font-style', 'italic')
+	            }
+
+	            buttons.on('click', function(d) {
+	            	update(d, data);
+	            })
+		}
+
+	</script>
+
+</head>
+<body>
+
+<script type="text/javascript">
+	d3.csv("baseball_data.csv", function(d) {
+		d['height'] = +d['height'];
+		d['weight'] = +d['weight'];
+		d['avg'] = +d['avg'];
+		d['HR'] = +d['HR'];
+		return d;
+	}, draw);
+</script>
+
+</body>
+</html>
+
+
+
+
+
+
+
+
+
+
+
+
