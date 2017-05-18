@@ -4,7 +4,10 @@
 	<script src="http://d3js.org/d3.v3.min.js"></script>
 	<style>
 		text {
-			font-family: 'Arial'
+			font-family: 'Arial';
+		}
+		.label {
+			font-size: 20px
 		}
 		div.hand_buttons{
 			position: fixed;
@@ -16,6 +19,14 @@
         		padding: 20px;
         		margin: 20px;
         		font-family: 'Arial';	
+		}
+		line {
+			border: none;
+			border-top: 5px dotted 'black';
+			width: 5px;
+		}
+		circle {
+			opacity: 0.4;
 		}
 	</style>
 	<script type="text/javascript">
@@ -110,6 +121,31 @@
 	            	.attr('transform', 'translate(' + (width / 2) +',' + (height + margin - 30) + ')rotate(0)')
 	            	.text('Average Runs per Game');
 
+	           	var mean = d3.mean(data, function(d) {
+				return d['avg'];
+			})
+			var scaled_mean = avg_scale(mean)
+
+			svg.append('line')
+				.attr('class', 'avg line')
+				.attr('x1', scaled_mean)
+				.attr('x2', scaled_mean)
+				.attr('y1', height)
+				.attr('y2', margin)
+				.attr('stroke-width', 2)
+				.attr('stroke', 'black')
+
+			var mean_to_print = mean.toFixed(3) 
+
+			svg.append('text')
+				.attr('class', 'avg label')
+				.attr('text-anchor', 'middle')
+				.attr('transform', 'translate(' + scaled_mean + ',' + (margin - 10) + ')')
+				.text('Average number of runs per game for all players (' + mean_to_print + ')')
+
+
+
+
 	            var hands = ['L','R', 'B', 'All']
 
 	            var buttons = d3.select('body')
@@ -131,13 +167,27 @@
 	            	var circles = svg.selectAll('circle')
 	            				.data(filtered, function(d) {
 	            					return d['name'];
-	            				});
+	            	});
+	            	var mean = d3.mean(filtered, function(d) {
+					return d['avg'];
+				})
+
+
+
+
 
 	            	if (hand === 'All') {
+	                 		svg.selectAll('line').remove()
+
+	            		var mean = d3.mean(data, function(d) {
+						return d['avg'];
+					})
+
 	            		var circles = svg.selectAll('circle')
 	            					.data(data, function(d) {
 	            						return d['name'];
 	            		})
+
 	            	};	
 	            				
 	            	circles.exit().remove();
@@ -160,6 +210,43 @@
 	            			return both_color;
 	            		}
 	            	});
+
+	            	var scaled_mean = avg_scale(mean)
+
+				svg.selectAll('line').remove()
+				svg.selectAll('.avg.label').remove()
+
+				svg.append('line')
+					.style('border-bottom', 'dotted')
+					.attr('class', 'avg line')
+					.attr('x1', scaled_mean)
+					.attr('x2', scaled_mean)
+					.attr('y1', height)
+					.attr('y2', margin)
+					.attr('stroke-width', 2)
+					.attr('stroke', 'black')
+
+				function full_hand(hand) {
+					if (hand === 'R') {
+						return 'right handers'
+					} else if (hand === 'L'){
+						return 'left handers'
+					} else if (hand === 'B') {
+						return 'ambidextrous batters'
+					} else {
+						return 'all players'
+					}
+				};
+
+				var mean_to_print = mean.toFixed(3) 
+
+				svg.append('text')
+					.attr('class', 'avg label')
+					.attr('text-anchor', 'middle')
+					.attr('transform', 'translate(' + scaled_mean + ',' + (margin - 10) + ')')
+					.text('Average number of runs per game for ' + full_hand(hand) + ' (' + mean_to_print + ')')
+
+
 
 
 
